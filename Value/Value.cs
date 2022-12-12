@@ -1,3 +1,4 @@
+using System;
 
 namespace Punygrad.Lib
 {
@@ -6,7 +7,7 @@ namespace Punygrad.Lib
 
 
         public Value(double data, 
-                (Value, Value)? children=null,
+                (Value, Value?)? children=null,
                 string? op=null)
         {
             Data = data;
@@ -35,7 +36,13 @@ namespace Punygrad.Lib
 
         public static Value operator -(Value left, Value right) 
         {
-            return new Value(left.Data - right.Data, (left, right), "-");
+            Value outValue = new Value(left.Data - right.Data, (left, right), "-");
+            outValue._Backward = () => {
+                left.Grad = 1.0 * outValue.Grad;
+                right.Grad = 1.0 * outValue.Grad;
+                return 0;
+            };
+            return outValue;
         }
 
         public static Value operator *(Value left, Value right) 
@@ -49,33 +56,23 @@ namespace Punygrad.Lib
             return outValue;
         }
 
+        public static Value tanh(Value left) 
+        {
+            var x = left.Data;
+            var t = (Math.Exp(2*x) - 1)/(Math.Exp(2*x) + 1);
+            Value outValue = new Value(t, (left, null), "*");
+            outValue._Backward = () => {
+                left.Grad = (1 - Math.Pow(t, 2)) * outValue.Grad;
+                return 0;
+            };
+            return outValue;
+        }
+
         public static Value operator /(Value left, Value right) 
         {
             return new Value(left.Data / right.Data, (left, right), "/");
         }
         
-        // Unary
-
-        public static Value operator ++(Value value) 
-        {
-            return new Value(value.Data+1, (value,new Value(1)), "+");
-        }
-
-        public static Value operator --(Value value) 
-        {
-            return new Value(value.Data-1, (value,new Value(1)), "-");
-        }
-
-        public static Value operator +(Value value)
-        {
-            return new Value(+value.Data);
-        }
-
-        public static Value operator -(Value value)
-        {
-            return new Value(-value.Data);
-        }
-
         public override string ToString()
         {
             return $"Value({Data.ToString("#.##")})";
