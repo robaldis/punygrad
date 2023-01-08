@@ -1,15 +1,14 @@
-﻿using System;
-using Punygrad.Lib;
+﻿using Punygrad.Lib;
 
 
-namespace Punygrad 
+namespace Punygrad
 {
-    class Program 
+    class Program
     {
         static void Main(string[] args)
         {
             // Inputs
-            var x1 = new Value(2.0);
+            Value x1 = new(2.0);
             var x2 = new Value(0.0);
             // Wieghts
             var w1 = new Value(-3.0);
@@ -17,11 +16,13 @@ namespace Punygrad
             // Bias
             var b = new Value(6.8813735870195432);
 
-            var x1w1 = x1*w1;
-            var x2w2 = x2*w2;
+            var x1w1 = x1 * w1;
+            var x2w2 = x2 * w2;
             var x1w1x2w2 = x1w1 + x2w2;
             var n = x1w1x2w2 + b;
-            var o = Value.tanh(n);
+            Value o = Value.Tanh(n);
+            string something = "something";
+            Console.WriteLine(something);
 
             o.Grad = 1;
             o._Backward();
