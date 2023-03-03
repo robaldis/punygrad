@@ -41,6 +41,19 @@ namespace Punygrad
             Console.WriteLine(x2.Grad);
             Console.WriteLine(w2.Grad);
 
+            Console.WriteLine("------------------------------");
+
+
+            Value r = new Value(1);
+            Value t = new Value(2);
+            Value k = r / t;
+            k.Grad = 1;
+            Console.WriteLine(k);
+            k._Backward();
+            Console.WriteLine(r.Grad);
+            Console.WriteLine(t.Grad);
+
+
         }
 
     }

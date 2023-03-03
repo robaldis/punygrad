@@ -20,12 +20,12 @@ namespace Punygrad.Lib
 
         public Func<int>? _Backward;
 
-        private static int argCount;
+        private static int _argCount;
 
         public static Value operator +(Value left, Value right)
         {
-            argCount = 1;
-            Console.WriteLine(argCount);
+            _argCount = 1;
+            Console.WriteLine(_argCount);
             Value outValue = new(left.Data + right.Data, (left, right), "+");
             outValue._Backward = () =>
             {
@@ -59,22 +59,39 @@ namespace Punygrad.Lib
             };
             return outValue;
         }
+        public static Value operator /(Value left, Value right)
+        {
+            return left * Pow(right, -1);
+        }
+
+        public static Value Pow(Value left, int right)
+        {
+            return Pow(left, (float)right);
+        }
+
+        public static Value Pow(Value left, float right)
+        {
+            var outValue = new Value(Math.Pow(left.Data, right), (left, null), "**");
+            outValue._Backward = () =>
+            {
+                left.Grad += right * Pow(left, -1).Data * outValue.Grad;
+                return 0;
+            };
+
+            return outValue;
+        }
 
         public static Value Tanh(Value left)
         {
             var x = left.Data;
-            double t = (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);
+            var t = (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);
             Value outValue = new(t, (left, null), "*");
-            outValue._Backward = () => {
+            outValue._Backward = () =>
+            {
                 left.Grad = (1 - Math.Pow(t, 2)) * outValue.Grad;
                 return 0;
             };
             return outValue;
-        }
-
-        public static Value operator /(Value left, Value right)
-        {
-            return new Value(left.Data / right.Data, (left, right), "/");
         }
 
         public override string ToString()
